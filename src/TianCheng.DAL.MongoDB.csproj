@@ -1,0 +1,52 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp1.1</TargetFramework>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <AssemblyVersion>1.0.2.3</AssemblyVersion>
+    <FileVersion>1.0.2.3</FileVersion>
+    <Version>1.0.2.3</Version>
+    <Authors>KKLL</Authors>
+    <Company>TianCheng</Company>
+    <Description>MongoDB 的数据库访问操作</Description>
+    <PackageProjectUrl>https://github.com/chengkkll/TianCheng.DAL.MongoDB</PackageProjectUrl>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>1701;1702;1705;1591</NoWarn>
+    <DocumentationFile>bin\Debug\netcoreapp1.1\TianCheng.DAL.MongoDB.xml</DocumentationFile>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="BaseDAL\**" />
+    <Compile Remove="CompanyManage\**" />
+    <Compile Remove="Demo\**" />
+    <Compile Remove="Exhibition\**" />
+    <Compile Remove="SaleManage\**" />
+    <Compile Remove="SystemBaseInfo\**" />
+    <EmbeddedResource Remove="BaseDAL\**" />
+    <EmbeddedResource Remove="CompanyManage\**" />
+    <EmbeddedResource Remove="Demo\**" />
+    <EmbeddedResource Remove="Exhibition\**" />
+    <EmbeddedResource Remove="SaleManage\**" />
+    <EmbeddedResource Remove="SystemBaseInfo\**" />
+    <None Remove="BaseDAL\**" />
+    <None Remove="CompanyManage\**" />
+    <None Remove="Demo\**" />
+    <None Remove="Exhibition\**" />
+    <None Remove="SaleManage\**" />
+    <None Remove="SystemBaseInfo\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MongoDB.Bson" Version="2.4.4" />
+    <PackageReference Include="MongoDB.Driver" Version="2.4.4" />
+    <PackageReference Include="TianCheng.Model" Version="1.0.2.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Attribute\" />
+  </ItemGroup>
+
+</Project>

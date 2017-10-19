@@ -4,3 +4,5 @@ src/bin
 src/obj
 *.log
 *.user
+samples/SamplesMongoDB/bin
+samples/SamplesMongoDB/obj

@@ -17,7 +17,7 @@ namespace TianCheng.DAL.MongoDB
         public override DateTime Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args)
         {
             var utcTime = base.Deserialize(context, args);
-            return new DateTime(utcTime.Ticks, DateTimeKind.Local);
+            return new DateTime(utcTime.Ticks, DateTimeKind.Utc).ToLocalTime();
         }
 
         public override void Serialize(BsonSerializationContext context, BsonSerializationArgs args, DateTime localTime)

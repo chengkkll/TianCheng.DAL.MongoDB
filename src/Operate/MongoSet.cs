@@ -1,4 +1,5 @@
 ﻿using MongoDB.Bson;
+using MongoDB.Driver;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -234,6 +235,20 @@ namespace TianCheng.DAL.MongoDB
             using (var connection = new MongoConnection<T>())
             {
                 connection.Drop();
+            }
+        }
+
+        /// <summary>
+        /// Aggregate统计查询
+        /// </summary>
+        /// <typeparam name="R"></typeparam>
+        /// <param name="pipeline"></param>
+        /// <returns></returns>
+        public List<R> Aggregate<R>(PipelineDefinition<T, R> pipeline)
+        {
+            using (var connection = new MongoConnection<T>())
+            {
+                return connection.Aggregate<R>(pipeline);
             }
         }
     }

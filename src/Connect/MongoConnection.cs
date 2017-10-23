@@ -23,18 +23,18 @@ namespace TianCheng.DAL.MongoDB
         public MongoConnection(string connectionString, string datebaseName)
         {
             _mongoClient = new MongoClient(connectionString);
-            
+
             _mongoDatabase = _mongoClient.GetDatabase(datebaseName);
             //_mongoCollection = _mongoDatabase.GetCollection<T>(typeof(T).Name);
             string collectionName = MongoCollectionDict.Collection[typeof(T).Name];
-            _mongoCollection = _mongoDatabase.GetCollection<T>(collectionName);            
+            _mongoCollection = _mongoDatabase.GetCollection<T>(collectionName);
         }
 
         public MongoConnection()
         {
             MongoConnectionSettings setting = MongoContext.Settings;
             _mongoClient = new MongoClient(setting.ConnectionString);
-            
+
             _mongoDatabase = _mongoClient.GetDatabase(setting.Database);
             string collectionName = MongoCollectionDict.Collection[typeof(T).Name];
             _mongoCollection = _mongoDatabase.GetCollection<T>(collectionName);
@@ -205,5 +205,26 @@ namespace TianCheng.DAL.MongoDB
         #endregion
 
 
+
+        /// <summary>
+        /// Aggregate统计查询
+        /// </summary>
+        public List<R> Aggregate<R>(PipelineDefinition<T, R> pipeline)
+        {
+            //var group = new BsonDocument();
+            //group.AddRange(new BsonDocument("_id", "$SalerId"));
+            //group.AddRange(new BsonDocument("total", new BsonDocument( "$sum",1)));
+
+            //PipelineDefinition<T, R> pipeline = new BsonDocument[]
+            //{
+            //    new BsonDocument { { "$group", group } }
+            //};
+
+            var cursor = _mongoCollection.Aggregate(pipeline);
+
+            var result = cursor.ToList();
+            return result;
+        }
     }
+
 }

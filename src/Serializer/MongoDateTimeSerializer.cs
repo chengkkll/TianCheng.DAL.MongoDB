@@ -22,7 +22,7 @@ namespace TianCheng.DAL.MongoDB
 
         public override void Serialize(BsonSerializationContext context, BsonSerializationArgs args, DateTime localTime)
         {
-            var utcTime = new DateTime(localTime.Ticks, DateTimeKind.Utc);
+            var utcTime = new DateTime(localTime.Ticks, DateTimeKind.Local).ToUniversalTime();
             base.Serialize(context, args, utcTime);
         }
 

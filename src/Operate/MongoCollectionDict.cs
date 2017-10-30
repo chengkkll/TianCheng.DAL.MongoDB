@@ -15,6 +15,8 @@ namespace TianCheng.DAL.MongoDB
     {
         static private Dictionary<string, string> collectionDict = null;
 
+        private static readonly object obj = new object();
+
         ///// <summary>
         ///// 获取有效的程序集
         ///// </summary>
@@ -61,28 +63,34 @@ namespace TianCheng.DAL.MongoDB
         /// </summary>
         static public void Init()
         {
-            foreach (Assembly assembly in TianCheng.Model.AssemblyHelper.GetAssemblyList())
+            lock (obj)
             {
-                if (collectionDict == null)
+                if(collectionDict != null)
+                {
+                    return;
+                }
+                else
                 {
                     collectionDict = new Dictionary<string, string>();
                 }
-
-                foreach (var type in assembly.GetTypes())
+                foreach (Assembly assembly in TianCheng.Model.AssemblyHelper.GetAssemblyList())
                 {
-                    CollectionMappingAttribute attribute = type.GetTypeInfo().GetCustomAttribute<CollectionMappingAttribute>(false);    //false 不获取基类中的特性
-                    string typeName = type.Name;
-                    string collectionName = typeName;
-                    if (attribute != null)
+                    foreach (var type in assembly.GetTypes())
                     {
-                        collectionName = attribute.Name;
+                        CollectionMappingAttribute attribute = type.GetTypeInfo().GetCustomAttribute<CollectionMappingAttribute>(false);    //false 不获取基类中的特性
+                        string typeName = type.Name;
+                        string collectionName = typeName;
+                        if (attribute != null)
+                        {
+                            collectionName = attribute.Name;
+                        }
+                        if (collectionDict.ContainsKey(typeName))
+                        {
+                            continue;
+                            //throw ApiException.ConnectionDB("指定对象存储的表有重复项，请检查：" + typeName + "。");
+                        }
+                        collectionDict.Add(typeName, collectionName);
                     }
-                    if (collectionDict.ContainsKey(typeName))
-                    {
-                        continue;
-                        //throw ApiException.ConnectionDB("指定对象存储的表有重复项，请检查：" + typeName + "。");
-                    }
-                    collectionDict.Add(typeName, collectionName);
                 }
             }
         }

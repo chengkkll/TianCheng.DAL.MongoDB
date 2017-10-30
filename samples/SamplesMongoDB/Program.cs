@@ -23,7 +23,9 @@ namespace SamplesMongoDB
 
 
             ContactClientDAL ccDal = new ContactClientDAL();
-            List<ContactClientReport> result = ccDal.Group<ContactClientReport>();
+
+            List<ContactClientReport> result = ccDal.Report();
+
             Console.Read();
         }
     }

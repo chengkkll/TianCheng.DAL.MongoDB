@@ -1,4 +1,5 @@
 ﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 using SamplesMongoDB.Model;
 using System;
@@ -70,7 +71,27 @@ namespace SamplesMongoDB.DAL
 
         }
 
+        public List<ContactClientInfo> TestFind()
+        {
 
+
+            //FilterDefinition<ContactClientInfo> filter = Builders<ContactClientInfo>.Filter.Eq("Client.Name", "哈尔滨业勤服装服饰有限公司");
+
+            var builder = Builders<ContactClientInfo>.Filter;
+            var filter = builder.Empty;
+
+            filter = filter & builder.Eq("Client.Name", "哈尔滨业勤服装服饰有限公司");
+
+            filter = filter & builder.Ne("Client.Linkman", "纪1军");
+
+
+
+
+
+            return FindByMongodb(filter);
+        }
+
+        
         //public List<object> Demo()
         //{
         //    const string pipelineJson1 = " {$skip : 5}";

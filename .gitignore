@@ -6,3 +6,4 @@ src/obj
 *.user
 samples/SamplesMongoDB/bin
 samples/SamplesMongoDB/obj
+samples/SamplesMongoDB/Logs

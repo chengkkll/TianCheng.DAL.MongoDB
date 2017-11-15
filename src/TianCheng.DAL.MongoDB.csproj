@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp1.1</TargetFramework>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <AssemblyVersion>1.0.2.5</AssemblyVersion>
-    <FileVersion>1.0.2.5</FileVersion>
-    <Version>1.0.2.5</Version>
+    <AssemblyVersion>1.1.0.5</AssemblyVersion>
+    <FileVersion>1.1.0.5</FileVersion>
+    <Version>1.1.0.5-alpha</Version>
     <Authors>KKLL</Authors>
     <Company>TianCheng</Company>
     <Description>MongoDB 的数据库访问操作</Description>
@@ -40,13 +40,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.0.0" />
     <PackageReference Include="MongoDB.Bson" Version="2.4.4" />
     <PackageReference Include="MongoDB.Driver" Version="2.4.4" />
-    <PackageReference Include="TianCheng.Model" Version="1.0.2.4" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Attribute\" />
+    <PackageReference Include="Serilog.Sinks.MongoDB" Version="3.1.0" />
+    <PackageReference Include="TianCheng.Model" Version="1.1.0.4-alpha" />
   </ItemGroup>
 
 </Project>

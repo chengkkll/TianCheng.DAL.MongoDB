@@ -10,7 +10,7 @@ using TianCheng.Model;
 
 namespace TianCheng.DAL.MongoDB
 {
-    public class MongoSet<T> where T : MongoIdModel
+    public class MongoSet<T> : IDBOperation<T> where T : MongoIdModel
     {
         public int Count
         {
@@ -46,7 +46,22 @@ namespace TianCheng.DAL.MongoDB
 
                     return entities;
                 }
-                catch (Exception)
+                catch 
+                {
+                    throw;
+                }
+            }
+        }
+
+        public IQueryable<T> Queryable()
+        {
+            using (var connection = new MongoConnection<T>())
+            {
+                try
+                {
+                    return connection.Queryable();
+                }
+                catch
                 {
                     throw;
                 }
@@ -160,11 +175,22 @@ namespace TianCheng.DAL.MongoDB
         /// 按照id删除表中的数据
         /// </summary>
         /// <param name="id"></param>
-        public void Remove(string id)
+        public T Remove(string id)
         {
             using (var connection = new MongoConnection<T>())
             {
-                connection.Delete(id);
+                return connection.Delete(id);
+            }
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ids"></param>
+        public void Remove(IEnumerable<string> ids)
+        {
+            foreach(string id in ids)
+            {
+                Remove(id);
             }
         }
         /// <summary>
@@ -207,12 +233,13 @@ namespace TianCheng.DAL.MongoDB
         /// 将数据更新到数据库
         /// </summary>
         /// <param name="entity"></param>
-        public void Update(T entity)
+        public bool Update(T entity)
         {
             using (var connection = new MongoConnection<T>())
             {
                 connection.Update(entity);
             }
+            return true;
         }
 
         /// <summary>
@@ -251,5 +278,20 @@ namespace TianCheng.DAL.MongoDB
                 return connection.Aggregate<R>(pipeline);
             }
         }
+
+        /// <summary>
+        /// 根据Mongodb的查询条件查询
+        /// </summary>
+        /// <param name="filter"></param>
+        /// <returns></returns>
+        public List<T> FindByMongodb(FilterDefinition<T> filter)
+        {
+            using (var connection = new MongoConnection<T>())
+            {
+                return connection.FindByMongodb(filter);
+            }
+        }
+
+
     }
 }

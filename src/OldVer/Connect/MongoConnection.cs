@@ -225,6 +225,25 @@ namespace TianCheng.DAL.MongoDB
             var result = cursor.ToList();
             return result;
         }
+
+        /// <summary>
+        /// 根据Mongodb的查询条件查询
+        /// </summary>
+        /// <param name="filter"></param>
+        /// <returns></returns>
+        public List<T> FindByMongodb(FilterDefinition<T> filter)
+        {
+            return _mongoCollection.Find(filter).ToList();
+        }
+
+        /// <summary>
+        /// 获取当前集合的查询链式接口
+        /// </summary>
+        /// <returns></returns>
+        public IQueryable<T> Queryable()
+        {
+            return _mongoCollection.AsQueryable();
+        }
     }
 
 }

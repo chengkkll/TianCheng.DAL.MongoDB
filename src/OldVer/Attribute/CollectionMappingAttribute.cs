@@ -23,5 +23,10 @@ namespace TianCheng.DAL.MongoDB
         {
             Name = name;
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public string Connection { get; set; }
     }
 }

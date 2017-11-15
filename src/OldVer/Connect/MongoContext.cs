@@ -36,7 +36,14 @@ namespace TianCheng.DAL.MongoDB
                         if (!_Initializationed)
                         {
                             //注册DateTimeSerializer
-                            BsonSerializer.RegisterSerializer(typeof(DateTime), new MongoDateTimeSerializer());
+                            try
+                            {
+                                BsonSerializer.RegisterSerializer(typeof(DateTime), new MongoDateTimeSerializer());
+                            }
+                            catch
+                            {
+
+                            }
                             //获取连接字符串
                             LoadSettingsByFile();
                             _Initializationed = true;

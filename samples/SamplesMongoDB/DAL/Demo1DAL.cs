@@ -10,7 +10,7 @@ namespace SamplesMongoDB.DAL
     /// <summary>
     /// 
     /// </summary>
-    [DBMapping("test_demo", "Hangfire")]
+    [DBMapping("test_demo")]
     public class DemoDAL : MongoOperation<DemoInfo>
     {
         public DemoDAL()
@@ -22,8 +22,8 @@ namespace SamplesMongoDB.DAL
         /// </summary>
         public void Test()
         {
-            var result = Undelete(new List<string>() { "5a02b873306ad0550c48e305", "5a02b9cf03e96c56c8c93f17" });
-            result = Delete(new List<string>() { "5a02b873306ad0550c48e305", "5a02b9cf03e96c56c8c93f17" });
+            //var result = Undelete(new List<string>() { "5a02b873306ad0550c48e305", "5a02b9cf03e96c56c8c93f17" });
+            //result = Delete(new List<string>() { "5a02b873306ad0550c48e305", "5a02b9cf03e96c56c8c93f17" });
 
             var t = SearchById("5a02b873306ad0550c48e305");
             // var result = Undelete("5a02b873306ad0550c48e305");

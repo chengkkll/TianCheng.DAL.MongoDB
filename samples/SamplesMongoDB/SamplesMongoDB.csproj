@@ -19,4 +19,8 @@
     <ProjectReference Include="..\..\src\TianCheng.DAL.MongoDB.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Logs\" />
+  </ItemGroup>
+
 </Project>

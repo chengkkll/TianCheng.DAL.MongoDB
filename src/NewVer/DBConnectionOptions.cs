@@ -36,6 +36,21 @@ namespace TianCheng.DAL
         /// 登录密码
         /// </summary>
         public string Password { get; set; }
+        /// <summary>
+        /// 数据库链接字符串
+        /// </summary>
+        public string ConnectionString
+        {
+            get
+            {
+                if (ServerAddress.EndsWith('/') || Database.StartsWith('/'))
+                {
+                    return ServerAddress + Database;
+                }
+                return ServerAddress + "/" + Database;
+            }
+
+        }
     }
 
 }

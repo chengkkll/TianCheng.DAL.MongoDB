@@ -102,14 +102,11 @@ namespace TianCheng.DAL.MongoDB
         /// <returns></returns>
         public T SearchById(string id)
         {
-            ObjectId objId;
-            if (!ObjectId.TryParse(id, out objId))
+            if (!ObjectId.TryParse(id, out ObjectId objId))
             {
                 // 记录错误信息
                 DBLog.Logger.LogError($"按ID查询时参数错误，无法转换成ObjectId的Id值为：[{id}]类型为：[{typeof(T).FullName}]");
-
             }
-
             return SearchById(objId);
         }
 
@@ -119,13 +116,26 @@ namespace TianCheng.DAL.MongoDB
         /// <returns></returns>
         public T SearchById(ObjectId id)
         {
-            var result = _mongoCollection.FindAsync(new BsonDocument("_id", id)).Result;
-            List<T> objList = result.ToList();
-            if (objList.Count == 0)
+            try
             {
-                DBLog.Logger.LogWarning($"按ObjectId查询时,无法找到对象。ObjectId：[{id}]  类型：[{typeof(T).FullName}]");
+                var result = _mongoCollection.FindAsync(new BsonDocument("_id", id)).Result;
+                List<T> objList = result.ToList();
+                if (objList.Count == 0)
+                {
+                    DBLog.Logger.LogWarning($"按ObjectId查询时,无法找到对象。ObjectId：[{id}]  类型：[{typeof(T).FullName}]");
+                }
+                return objList.FirstOrDefault();
             }
-            return objList.FirstOrDefault();
+            catch (System.TimeoutException te)
+            {
+                DBLog.Logger.LogWarning(te, "数据库链接超时。链接字符串：" + _options.ConnectionOptions.ConnectionString);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                DBLog.Logger.LogWarning(ex, "操作异常终止。");
+                throw;
+            }
         }
 
         /// <summary>
@@ -148,10 +158,22 @@ namespace TianCheng.DAL.MongoDB
             //FieldDefinition<T> field = "Name";
 
             //var s = Builders<T>.Sort.Ascending(field);
+            try
+            {
+                _mongoCollection.Find(filter).Sort(sort).ToListAsync();
 
-            _mongoCollection.Find(filter).Sort(sort).ToListAsync();
-
-            return _mongoCollection.FindAsync(filter).Result.ToList();
+                return _mongoCollection.FindAsync(filter).Result.ToList();
+            }
+            catch (System.TimeoutException te)
+            {
+                DBLog.Logger.LogWarning(te, "数据库链接超时。链接字符串：" + _options.ConnectionOptions.ConnectionString);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                DBLog.Logger.LogWarning(ex, "操作异常终止。");
+                throw;
+            }
         }
 
         /// <summary>
@@ -166,7 +188,20 @@ namespace TianCheng.DAL.MongoDB
             FieldDefinition<T> field = queryInfo.Sort.Property;
             sort = Builders<T>.Sort.Combine(sort, queryInfo.Sort.IsAsc ? Builders<T>.Sort.Ascending(field) : Builders<T>.Sort.Descending(field));
 
-            return _mongoCollection.Find(filter).Sort(sort).ToListAsync().Result;
+            try
+            {
+                return _mongoCollection.Find(filter).Sort(sort).ToListAsync().Result;
+            }
+            catch (System.TimeoutException te)
+            {
+                DBLog.Logger.LogWarning(te, "数据库链接超时。链接字符串：" + _options.ConnectionOptions.ConnectionString);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                DBLog.Logger.LogWarning(ex, "操作异常终止。");
+                throw;
+            }
         }
 
         /// <summary>
@@ -175,8 +210,21 @@ namespace TianCheng.DAL.MongoDB
         /// <returns></returns>
         public IEnumerable<T> Search(T entity)
         {
-            var query = MongoSerializer.SerializeQueryModel(entity);
-            return _mongoCollection.FindAsync(query).Result.ToEnumerable();
+            try
+            {
+                var query = MongoSerializer.SerializeQueryModel(entity);
+                return _mongoCollection.FindAsync(query).Result.ToEnumerable();
+            }
+            catch (System.TimeoutException te)
+            {
+                DBLog.Logger.LogWarning(te, "数据库链接超时。链接字符串：" + _options.ConnectionOptions.ConnectionString);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                DBLog.Logger.LogWarning(ex, "操作异常终止。");
+                throw;
+            }
         }
 
         #endregion
@@ -206,8 +254,21 @@ namespace TianCheng.DAL.MongoDB
         /// <param name="entity"></param>
         public void Insert(T entity)
         {
-            DBLog.Logger.LogDebug($"插入数据 ==> 类型：[{typeof(T).FullName}]\r\n数据信息为：[{entity.ToJson()}] ");
-            _mongoCollection.InsertOne(entity);
+            DBLog.Logger.LogTrace($"插入数据 ==> 类型：[{typeof(T).FullName}]\r\n数据信息为：[{entity.ToJson()}] ");
+            try
+            {
+                _mongoCollection.InsertOne(entity);
+            }
+            catch (System.TimeoutException te)
+            {
+                DBLog.Logger.LogWarning(te, "数据库链接超时。链接字符串：" + _options.ConnectionOptions.ConnectionString);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                DBLog.Logger.LogWarning(ex, "操作异常终止。");
+                throw;
+            }
         }
 
         /// <summary>
@@ -216,8 +277,21 @@ namespace TianCheng.DAL.MongoDB
         /// <param name="entities"></param>
         public void Insert(IEnumerable<T> entities)
         {
-            DBLog.Logger.LogDebug($"插入多条数据 ==> 类型：[{typeof(T).FullName}]\r\n数据信息为：[{entities.ToJson()}] ");
-            _mongoCollection.InsertMany(entities);
+            DBLog.Logger.LogTrace($"插入多条数据 ==> 类型：[{typeof(T).FullName}]\r\n数据信息为：[{entities.ToJson()}] ");
+            try
+            {
+                _mongoCollection.InsertMany(entities);
+            }
+            catch (System.TimeoutException te)
+            {
+                DBLog.Logger.LogWarning(te, "数据库链接超时。链接字符串：" + _options.ConnectionOptions.ConnectionString);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                DBLog.Logger.LogWarning(ex, "操作异常终止。");
+                throw;
+            }
         }
 
         #region 异步插入操作
@@ -227,8 +301,21 @@ namespace TianCheng.DAL.MongoDB
         /// <param name="entity"></param>
         public async void InsertAsync(T entity)
         {
-            DBLog.Logger.LogDebug($"异步插入数据 ==> 类型：[{typeof(T).FullName}]\r\n数据信息为：[{entity.ToJson()}] ");
-            await _mongoCollection.InsertOneAsync(entity);
+            DBLog.Logger.LogTrace($"异步插入数据 ==> 类型：[{typeof(T).FullName}]\r\n数据信息为：[{entity.ToJson()}] ");
+            try
+            {
+                await _mongoCollection.InsertOneAsync(entity);
+            }
+            catch (System.TimeoutException te)
+            {
+                DBLog.Logger.LogWarning(te, "数据库链接超时。链接字符串：" + _options.ConnectionOptions.ConnectionString);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                DBLog.Logger.LogWarning(ex, "操作异常终止。");
+                throw;
+            }
         }
 
         /// <summary>
@@ -237,8 +324,21 @@ namespace TianCheng.DAL.MongoDB
         /// <param name="entities"></param>
         public async void InsertAsync(IEnumerable<T> entities)
         {
-            DBLog.Logger.LogDebug($"异步插入多条数据 ==> 类型：[{typeof(T).FullName}]\r\n数据信息为：[{entities.ToJson()}] ");
-            await _mongoCollection.InsertManyAsync(entities);
+            DBLog.Logger.LogTrace($"异步插入多条数据 ==> 类型：[{typeof(T).FullName}]\r\n数据信息为：[{entities.ToJson()}] ");
+            try
+            {
+                await _mongoCollection.InsertManyAsync(entities);
+            }
+            catch (System.TimeoutException te)
+            {
+                DBLog.Logger.LogWarning(te, "数据库链接超时。链接字符串：" + _options.ConnectionOptions.ConnectionString);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                DBLog.Logger.LogWarning(ex, "操作异常终止。");
+                throw;
+            }
         }
         #endregion
 
@@ -252,15 +352,32 @@ namespace TianCheng.DAL.MongoDB
         /// <returns></returns>
         public bool Update(T entity)
         {
-            DBLog.Logger.LogDebug($"更新单条数据 ==> 类型：[{typeof(T).FullName}]\r\n数据信息为：[{entity.ToJson()}] ");
-
-            ReplaceOneResult result = _mongoCollection.ReplaceOne(new BsonDocument("_id", entity.Id), entity);
-            if (result.ModifiedCount == 1)
+            DBLog.Logger.LogTrace($"更新单条数据 ==> 类型：[{typeof(T).FullName}]\r\n数据信息为：[{entity.ToJson()}] ");
+            try
             {
-                return true;
+                ReplaceOneResult result = _mongoCollection.ReplaceOne(o => o.Id == entity.Id, entity);
+                if (result.ModifiedCount == 1)
+                {
+                    return true;
+                }
+                if (result.ModifiedCount == 0 && result.MatchedCount == 1 && result.IsModifiedCountAvailable && result.IsAcknowledged)
+                {
+                    DBLog.Logger.LogDebug($"更新单条数据时，新数据与元数据相同，数据没有发生改变。 类型：[{typeof(T).FullName}]\r\n数据信息为：[{entity.ToJson()}] \r\n更新结果为：[{result.ToJson()}]");
+                    return true;
+                }
+                DBLog.Logger.LogError($"更新单条数据时，无数据改变。 类型：[{typeof(T).FullName}]\r\n数据信息为：[{entity.ToJson()}] \r\n更新结果为：[{result.ToJson()}]");
+                return false;
             }
-            DBLog.Logger.LogError($"更新单条数据时，无数据改变。 类型：[{typeof(T).FullName}]\r\n数据信息为：[{entity.ToJson()}] \r\n更新结果为：[{entity.ToJson()}]");
-            return false;
+            catch (System.TimeoutException te)
+            {
+                DBLog.Logger.LogWarning(te, "数据库链接超时。链接字符串：" + _options.ConnectionOptions.ConnectionString);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                DBLog.Logger.LogWarning(ex, "操作异常终止。");
+                throw;
+            }
         }
         /// <summary>
         /// 更新多条数据
@@ -281,15 +398,32 @@ namespace TianCheng.DAL.MongoDB
         /// <param name="entity"></param>
         public async Task<bool> UpdateAsync(T entity)
         {
-            DBLog.Logger.LogDebug($"异步更新单条数据 ==> 类型：[{typeof(T).FullName}]\r\n数据信息为：[{entity.ToJson()}] ");
-
-            ReplaceOneResult result = await _mongoCollection.ReplaceOneAsync(new BsonDocument("_id", entity.Id), entity);
-            if (result.ModifiedCount == 1)
+            DBLog.Logger.LogTrace($"异步更新单条数据 ==> 类型：[{typeof(T).FullName}]\r\n数据信息为：[{entity.ToJson()}] ");
+            try
             {
-                return true;
+                ReplaceOneResult result = await _mongoCollection.ReplaceOneAsync(new BsonDocument("_id", entity.Id), entity);
+                if (result.ModifiedCount == 1)
+                {
+                    return true;
+                }
+                if (result.ModifiedCount == 0 && result.MatchedCount == 1 && result.IsModifiedCountAvailable && result.IsAcknowledged)
+                {
+                    DBLog.Logger.LogDebug($"异步更新单条数据时，新数据与元数据相同，数据没有发生改变。 类型：[{typeof(T).FullName}]\r\n数据信息为：[{entity.ToJson()}] \r\n更新结果为：[{result.ToJson()}]");
+                    return true;
+                }
+                DBLog.Logger.LogError($"异步更新单条数据时，无数据改变。 类型：[{typeof(T).FullName}]\r\n数据信息为：[{entity.ToJson()}] \r\n更新结果为：[{result.ToJson()}]");
+                return false;
             }
-            DBLog.Logger.LogError($"异步更新单条数据时，无数据改变。 类型：[{typeof(T).FullName}]\r\n数据信息为：[{entity.ToJson()}] \r\n更新结果为：[{entity.ToJson()}]");
-            return false;
+            catch (System.TimeoutException te)
+            {
+                DBLog.Logger.LogWarning(te, "数据库链接超时。链接字符串：" + _options.ConnectionOptions.ConnectionString);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                DBLog.Logger.LogWarning(ex, "操作异常终止。");
+                throw;
+            }
         }
 
         /// <summary>
@@ -319,9 +453,28 @@ namespace TianCheng.DAL.MongoDB
         /// <param name="entity"></param>
         public void RemoveSearch(T entity)
         {
-            var query = MongoSerializer.SerializeQueryModel(entity);
-            DeleteResult result = _mongoCollection.DeleteManyAsync(query).Result;
-            DBLog.Logger.LogDebug($"将对象内容作为查询条件来物理删除数据 ==> 已删除数据：{result.DeletedCount}条\r\n 类型：[{typeof(T).FullName}]\r\n查询条件为：[{entity.ToJson()}] ");
+            DBLog.Logger.LogTrace($"物理删除数据 ==> 类型：[{typeof(T).FullName}]\r\n数据信息为：[{entity.ToJson()}] ");
+            try
+            {
+                var query = MongoSerializer.SerializeQueryModel(entity);
+                DeleteResult result = _mongoCollection.DeleteManyAsync(query).Result;
+                if (result.DeletedCount == 0)
+                {
+                    DBLog.Logger.LogDebug($"将对象内容作为查询条件来物理删除数据 ==> 无数据被删除。\r\n 类型：[{typeof(T).FullName}]\r\n查询条件为：[{entity.ToJson()}] ");
+                    return;
+                }
+                DBLog.Logger.LogDebug($"将对象内容作为查询条件来物理删除数据 ==> 已删除数据：{result.DeletedCount}条\r\n 类型：[{typeof(T).FullName}]\r\n查询条件为：[{entity.ToJson()}] ");
+            }
+            catch (System.TimeoutException te)
+            {
+                DBLog.Logger.LogWarning(te, "数据库链接超时。链接字符串：" + _options.ConnectionOptions.ConnectionString);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                DBLog.Logger.LogWarning(ex, "操作异常终止。");
+                throw;
+            }
         }
 
         /// <summary>
@@ -342,8 +495,7 @@ namespace TianCheng.DAL.MongoDB
             List<ObjectId> objIdList = new List<ObjectId>();
             foreach (string id in ids)
             {
-                ObjectId objId;
-                if (!ObjectId.TryParse(id, out objId))
+                if (!ObjectId.TryParse(id, out ObjectId objId))
                 {
                     // 做记录，物理删除的ID不存在
                     DBLog.Logger.LogError($"按ID物理删除时参数错误，无法转换成ObjectId的Id值为：[{id}]\r\nID列表为：[{ids.ToJson()}]\r\n类型为：[{typeof(T).FullName}]");
@@ -361,13 +513,24 @@ namespace TianCheng.DAL.MongoDB
         public void Remove(IEnumerable<ObjectId> ids)
         {
             var filter = Builders<T>.Filter.AnyIn("_id", ids);
-
-            DeleteResult result = _mongoCollection.DeleteManyAsync(filter).Result;
-
-            if (result.DeletedCount != ids.Count())
+            try
             {
-                // 没有完全删除，做日志记录
-                DBLog.Logger.LogWarning($"根据ID列表 物理删除一组数据 ==> 已删除数据：{result.DeletedCount}条,按条件应删除{ids.Count()}条\r\n 类型：[{typeof(T).FullName}]\r\n查询条件为：[{ids.ToJson()}] ");
+                DeleteResult result = _mongoCollection.DeleteManyAsync(filter).Result;
+                if (result.DeletedCount != ids.Count())
+                {
+                    // 没有完全删除，做日志记录
+                    DBLog.Logger.LogWarning($"根据ID列表 物理删除一组数据 ==> 已删除数据：{result.DeletedCount}条,按条件应删除{ids.Count()}条\r\n 类型：[{typeof(T).FullName}]\r\n查询条件为：[{ids.ToJson()}] ");
+                }
+            }
+            catch (System.TimeoutException te)
+            {
+                DBLog.Logger.LogWarning(te, "数据库链接超时。链接字符串：" + _options.ConnectionOptions.ConnectionString);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                DBLog.Logger.LogWarning(ex, "操作异常终止。");
+                throw;
             }
         }
         /// <summary>
@@ -377,8 +540,7 @@ namespace TianCheng.DAL.MongoDB
         /// <returns>返回已删除的对象信息</returns>
         public T Remove(string id)
         {
-            ObjectId objId;
-            if (!ObjectId.TryParse(id, out objId))
+            if (!ObjectId.TryParse(id, out ObjectId objId))
             {
                 DBLog.Logger.LogError($"按ID物理删除时参数错误，无法转换成ObjectId的Id值为：[{id}]\r\n类型为：[{typeof(T).FullName}]");
                 ApiException.ThrowBadRequest("物理删除的ID值错误");
@@ -416,8 +578,7 @@ namespace TianCheng.DAL.MongoDB
         /// <returns></returns>
         public bool Delete(string id)
         {
-            ObjectId objId;
-            if (!ObjectId.TryParse(id, out objId))
+            if (!ObjectId.TryParse(id, out ObjectId objId))
             {
                 // 做记录，删除的ID不存在
                 DBLog.Logger.LogError($"按ID逻辑删除时参数错误，无法转换成ObjectId的Id值为：[{id}]\r\n类型为：[{typeof(T).FullName}]");
@@ -433,16 +594,32 @@ namespace TianCheng.DAL.MongoDB
             FilterDefinition<T> filter = Builders<T>.Filter.Eq("_id", objId);
             UpdateDefinition<T> ud = Builders<T>.Update.Set("IsDelete", true);
 
-            UpdateResult result = _mongoCollection.UpdateOneAsync(filter, ud).Result;
-
-            if (1 != result.MatchedCount)
+            try
             {
-                // 更新失败，记录日志
-                DBLog.Logger.LogError($"按ID逻辑删除时失败，无数据被更新。Id值为：[{objId.ToString()}]\r\n类型为：[{typeof(T).FullName}]\r\n更新结果为：[{result.ToJson()}]");
-                return false;
+                UpdateResult result = _mongoCollection.UpdateOneAsync(filter, ud).Result;
+                if (result.ModifiedCount == 0 && result.MatchedCount == 1)
+                {
+                    DBLog.Logger.LogWarning($"按ID逻辑删除操作取消，数据已被逻辑删除。Id值为：[{objId.ToString()}]\r\n类型为：[{typeof(T).FullName}]\r\n操作结果为：[{result.ToJson()}]");
+                    return true;
+                }
+                if (1 != result.ModifiedCount)
+                {
+                    // 更新失败，记录日志
+                    DBLog.Logger.LogError($"按ID逻辑删除时失败，无数据被更新。Id值为：[{objId.ToString()}]\r\n类型为：[{typeof(T).FullName}]\r\n操作结果为：[{result.ToJson()}]");
+                    return false;
+                }
+                return true;
             }
-
-            return true;
+            catch (System.TimeoutException te)
+            {
+                DBLog.Logger.LogWarning(te, "数据库链接超时。链接字符串：" + _options.ConnectionOptions.ConnectionString);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                DBLog.Logger.LogWarning(ex, "操作异常终止。");
+                throw;
+            }
         }
         /// <summary>
         /// 根据ID列表 逻辑删除一组数据
@@ -454,8 +631,7 @@ namespace TianCheng.DAL.MongoDB
             List<ObjectId> objIdList = new List<ObjectId>();
             foreach (string id in ids)
             {
-                ObjectId objId;
-                if (!ObjectId.TryParse(id, out objId))
+                if (!ObjectId.TryParse(id, out ObjectId objId))
                 {
                     // 做记录，删除的ID不存在
                     DBLog.Logger.LogError($"按ID逻辑删除时参数错误，无法转换成ObjectId的Id值为：[{id}]\r\nID列表为：[{ids.ToJson()}]\r\n类型为：[{typeof(T).FullName}]");
@@ -476,16 +652,32 @@ namespace TianCheng.DAL.MongoDB
             FilterDefinition<T> filter = Builders<T>.Filter.AnyIn("_id", ids);
             UpdateDefinition<T> ud = Builders<T>.Update.Set("IsDelete", true);
 
-            UpdateResult result = _mongoCollection.UpdateManyAsync(filter, ud).Result;
-
-            if (ids.Count() != result.MatchedCount)
+            try
             {
-                // 不完全更新，记录日志
-                DBLog.Logger.LogWarning($"根据ID列表 逻辑删除一组数据 ==> 已删除数据：{result.MatchedCount}条,按条件应删除{ids.Count()}条\r\n 类型：[{typeof(T).FullName}]\r\n查询条件为：[{ids.ToJson()}] ");
-                return false;
+                UpdateResult result = _mongoCollection.UpdateManyAsync(filter, ud).Result;
+                if (result.ModifiedCount != ids.Count() && result.MatchedCount == ids.Count())
+                {
+                    DBLog.Logger.LogWarning($"按ID逻辑删除操作完成，其中部分数据在操作前已被逻辑删除。Id列表为：[{ids.ToString()}]\r\n类型为：[{typeof(T).FullName}]\r\n操作结果为：[{result.ToJson()}]");
+                    return true;
+                }
+                if (ids.Count() != result.ModifiedCount)
+                {
+                    // 不完全更新，记录日志
+                    DBLog.Logger.LogWarning($"根据ID列表 逻辑删除一组数据 ==> 已删除数据：{result.MatchedCount}条,按条件应删除{ids.Count()}条\r\n 类型：[{typeof(T).FullName}]\r\n查询条件为：[{ids.ToJson()}] ");
+                    return false;
+                }
+                return true;
             }
-
-            return true;
+            catch (System.TimeoutException te)
+            {
+                DBLog.Logger.LogWarning(te, "数据库链接超时。链接字符串：" + _options.ConnectionOptions.ConnectionString);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                DBLog.Logger.LogWarning(ex, "操作异常终止。");
+                throw;
+            }
         }
         #endregion
 
@@ -497,8 +689,7 @@ namespace TianCheng.DAL.MongoDB
         /// <returns></returns>
         public bool Undelete(string id)
         {
-            ObjectId objId;
-            if (!ObjectId.TryParse(id, out objId))
+            if (!ObjectId.TryParse(id, out ObjectId objId))
             {
                 // 记录日志：逻辑删除的ID错误
                 DBLog.Logger.LogError($"按ID取消逻辑删除时参数错误，无法转换成ObjectId。\r\nId值为：[{id}]\t类型为：[{typeof(T).FullName}]");
@@ -513,17 +704,32 @@ namespace TianCheng.DAL.MongoDB
         {
             FilterDefinition<T> filter = Builders<T>.Filter.Eq("_id", objId);
             UpdateDefinition<T> ud = Builders<T>.Update.Set("IsDelete", false);
-
-            UpdateResult result = _mongoCollection.UpdateOneAsync(filter, ud).Result;
-
-            if (1 != result.MatchedCount)
+            try
             {
-                // 更新失败，记录日志
-                DBLog.Logger.LogError($"按ID取消逻辑删除时失败，无数据被更新。Id值为：[{objId.ToString()}]\r\n类型为：[{typeof(T).FullName}]\r\n更新结果为：[{result.ToJson()}]");
-                return false;
+                UpdateResult result = _mongoCollection.UpdateOneAsync(filter, ud).Result;
+                if (result.ModifiedCount != 1 && result.MatchedCount == 1)
+                {
+                    DBLog.Logger.LogWarning($"按ID逻辑删除操作完成，数据在操作前已被逻辑删除。Id值为：[{objId.ToString()}]\r\n类型为：[{typeof(T).FullName}]\r\n操作结果为：[{result.ToJson()}]");
+                    return true;
+                }
+                if (1 != result.ModifiedCount)
+                {
+                    // 更新失败，记录日志
+                    DBLog.Logger.LogError($"按ID取消逻辑删除时失败，无数据被更新。Id值为：[{objId.ToString()}]\r\n类型为：[{typeof(T).FullName}]\r\n操作结果为：[{result.ToJson()}]");
+                    return false;
+                }
+                return true;
             }
-
-            return true;
+            catch (System.TimeoutException te)
+            {
+                DBLog.Logger.LogWarning(te, "数据库链接超时。链接字符串：" + _options.ConnectionOptions.ConnectionString);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                DBLog.Logger.LogWarning(ex, "操作异常终止。");
+                throw;
+            }
         }
         /// <summary>
         /// 根据ID列表 还原被逻辑删除的数据
@@ -535,8 +741,7 @@ namespace TianCheng.DAL.MongoDB
             List<ObjectId> objIdList = new List<ObjectId>();
             foreach (string id in ids)
             {
-                ObjectId objId;
-                if (!ObjectId.TryParse(id, out objId))
+                if (!ObjectId.TryParse(id, out ObjectId objId))
                 {
                     // 做记录，删除的ID不存在
                     DBLog.Logger.LogError($"按ID取消逻辑删除时参数错误，无法转换成ObjectId的Id值为：[{id}]\r\nID列表为：[{ids.ToJson()}]\r\n类型为：[{typeof(T).FullName}]");
@@ -556,16 +761,33 @@ namespace TianCheng.DAL.MongoDB
         {
             FilterDefinition<T> filter = Builders<T>.Filter.AnyIn("_id", ids);          // 设置还原的过滤条件
             UpdateDefinition<T> ud = Builders<T>.Update.Set("IsDelete", false);         // 设置还原逻辑删除
-            UpdateResult result = _mongoCollection.UpdateManyAsync(filter, ud).Result;  // 执行还原逻辑删除操作
 
-            if (ids.Count() != result.MatchedCount)
+            try
             {
-                // 还原不完全，记录日志
-                DBLog.Logger.LogWarning($"根据ID列表 取消逻辑删除一组数据 ==> 已删除数据：{result.MatchedCount}条,按条件应删除{ids.Count()}条。\r\n 类型：[{typeof(T).FullName}]\r\n查询条件为：[{ids.ToJson()}] ");
-                return false;
+                UpdateResult result = _mongoCollection.UpdateManyAsync(filter, ud).Result;  // 执行还原逻辑删除操作
+                if (result.ModifiedCount != ids.Count() && result.MatchedCount == ids.Count())
+                {
+                    DBLog.Logger.LogWarning($"按ID还原删除操作完成，其中部分数据在操作前是非删除状态。Id列表为：[{ids.ToString()}]\r\n类型为：[{typeof(T).FullName}]\r\n操作结果为：[{result.ToJson()}]");
+                    return true;
+                }
+                if (ids.Count() != result.ModifiedCount)
+                {
+                    // 还原不完全，记录日志
+                    DBLog.Logger.LogWarning($"根据ID列表 取消逻辑删除一组数据 ==> 已删除数据：{result.MatchedCount}条,按条件应删除{ids.Count()}条。\r\n 类型：[{typeof(T).FullName}]\r\n查询条件为：[{ids.ToJson()}] ");
+                    return false;
+                }
+                return true;
             }
-
-            return true;
+            catch (System.TimeoutException te)
+            {
+                DBLog.Logger.LogWarning(te, "数据库链接超时。链接字符串：" + _options.ConnectionOptions.ConnectionString);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                DBLog.Logger.LogWarning(ex, "操作异常终止。");
+                throw;
+            }
         }
         #endregion
 

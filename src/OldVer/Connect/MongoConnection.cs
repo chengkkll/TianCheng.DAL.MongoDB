@@ -77,8 +77,7 @@ namespace TianCheng.DAL.MongoDB
         /// <returns></returns>
         public T Search(string id)
         {
-            ObjectId objId;
-            ObjectId.TryParse(id, out objId);
+            ObjectId.TryParse(id, out ObjectId objId);
 
             return _mongoCollection.Find(new BsonDocument("_id", objId)).FirstOrDefault();
         }
@@ -176,8 +175,7 @@ namespace TianCheng.DAL.MongoDB
         /// <returns></returns>
         public T Delete(string id)
         {
-            ObjectId objId;
-            ObjectId.TryParse(id, out objId);
+            ObjectId.TryParse(id, out ObjectId objId);
 
             return _mongoCollection.FindOneAndDelete(new BsonDocument("_id", objId));
         }

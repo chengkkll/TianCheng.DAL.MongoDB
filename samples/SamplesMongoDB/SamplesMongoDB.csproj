@@ -16,11 +16,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\TianCheng.DAL.MongoDB.csproj" />
+    <Folder Include="Logs\" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Logs\" />
+    <ProjectReference Include="..\..\..\TianCheng.DAL.Interface\TianCheng.DAL.Interface.csproj" />
+    <ProjectReference Include="..\..\src\TianCheng.DAL.MongoDB.csproj" />
   </ItemGroup>
 
 </Project>

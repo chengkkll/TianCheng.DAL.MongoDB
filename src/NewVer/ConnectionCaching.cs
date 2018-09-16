@@ -31,7 +31,7 @@ namespace TianCheng.DAL.MongoDB
         /// <returns></returns>
         protected override Dictionary<string, DBMappingAttribute> ReadFile(string fileContent)
         {
-            DBLog.UpdateLogSetting(fileContent);
+            //DBLog.UpdateLogSetting(fileContent);
             LoadOptions(fileContent);
             return LoadAttribute();
         }
@@ -47,10 +47,16 @@ namespace TianCheng.DAL.MongoDB
             {
                 foreach (Type type in assembly.GetTypes())
                 {
-                    if (type.GetInterface("IDBOperation`1") == null)
+
+                    if (type.GetInterfaces().Where(i => i.ToString().Contains("IDBOperation")).Count() == 0)
                     {
                         continue;
                     }
+                    if (type.IsInterface) continue;
+                    //if (type.GetInterface("IDBOperation`") == null)
+                    //{
+                    //    continue;
+                    //}
                     if (type.Name.Contains("`"))    // 自动忽略带泛型的定义
                     {
                         continue;
@@ -60,17 +66,17 @@ namespace TianCheng.DAL.MongoDB
                     {
                         if (!result.ContainsKey(type.FullName))
                         {
-                            attribute.TypeName = type.FullName;                            
-                            if (String.IsNullOrWhiteSpace(attribute.OptionsName))
+                            attribute.DALTypeName = type.FullName;
+                            if (String.IsNullOrWhiteSpace(attribute.ConnectionName))
                             {
                                 attribute.ConnectionOptions = DefaultOptions();
                             }
                             else
                             {
-                                attribute.OptionsName = attribute.OptionsName.ToLower();
-                                attribute.ConnectionOptions = Options(attribute.OptionsName);
+                                attribute.ConnectionName = attribute.ConnectionName.ToLower();
+                                attribute.ConnectionOptions = Options(attribute.ConnectionName);
                             }
-                            result.Add(attribute.TypeName, attribute);
+                            result.Add(attribute.DALTypeName, attribute);
                         }
                     }
                     else
@@ -82,7 +88,20 @@ namespace TianCheng.DAL.MongoDB
             return result;
         }
 
-        private List<DBConnectionOptions> OptionsList;
+
+        #region 设置缓存处理
+        /// <summary>
+        /// 根据文件依赖设置缓存信息
+        /// </summary>
+        public override Dictionary<string, DBMappingAttribute> SetCache()
+        {
+            Dictionary<string, DBMappingAttribute> val = ReadFile("");
+            SetCache(CacheKey, val);
+            return val;
+        }
+        #endregion
+
+        private List<DBConnectionOptions> OptionsList = new List<DBConnectionOptions>();
         /// <summary>
         /// 获取配置信息中的数据库连接配置
         /// </summary>
@@ -90,19 +109,49 @@ namespace TianCheng.DAL.MongoDB
         /// <returns></returns>
         private void LoadOptions(string settingContent)
         {
-            // 获取链接字符串的节点
-            var jSettings = JObject.Parse(settingContent)["DBConnection"];
-            if (jSettings == null)
+            var configuration = TianCheng.Model.AppConfig.Configuration;
+            OptionsList.Clear();
+            for (int i = 0; true; i++)
+            {
+                string serverAddress = configuration.GetSection($"DBConnection:{i}:ServerAddress").Value;
+                if (String.IsNullOrWhiteSpace(serverAddress))
+                {
+                    break;
+                }
+                string type = configuration.GetSection($"DBConnection:{i}:Type").Value;
+                if (type.ToLower() != "mongo")
+                {
+                    continue;
+                }
+                string name = configuration.GetSection($"DBConnection:{i}:Name").Value;
+                string database = configuration.GetSection($"DBConnection:{i}:Database").Value;
+
+                OptionsList.Add(new DBConnectionOptions
+                {
+                    Name = name,
+                    ServerAddress = serverAddress,
+                    Database = database,
+                    Type = type
+                });
+            }
+            if (OptionsList.Count == 0)
             {
                 throw new Exception("请填写数据库的链接配置");
             }
-            // 获取所有的数据库链接配置信息
-            OptionsList = JsonConvert.DeserializeObject<List<DBConnectionOptions>>(jSettings.ToString());
-            OptionsList = OptionsList.Where(e => e.Type != null && e.Type.ToLower() == "mongo").ToList();
-            foreach (var item in OptionsList)
-            {
-                item.Name = item.Name.ToLower();
-            }
+
+            //// 获取链接字符串的节点
+            //var jSettings = JObject.Parse(settingContent)["DBConnection"];
+            //if (jSettings == null)
+            //{
+            //    throw new Exception("请填写数据库的链接配置");
+            //}
+            //// 获取所有的数据库链接配置信息
+            //OptionsList = JsonConvert.DeserializeObject<List<DBConnectionOptions>>(jSettings.ToString());
+            //OptionsList = OptionsList.Where(e => e.Type != null && e.Type.ToLower() == "mongo").ToList();
+            //foreach (var item in OptionsList)
+            //{
+            //    item.Name = item.Name.ToLower();
+            //}
         }
         /// <summary>
         /// 

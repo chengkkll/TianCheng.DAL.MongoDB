@@ -19,7 +19,7 @@ namespace SamplesMongoDB
                 DemoDAL dal = new DemoDAL();
 
                 DemoInfo info = new DemoInfo() { Name = Guid.NewGuid().ToString(), Date = DateTime.Now };
-                dal.Insert(info);
+                dal.InsertObject(info);
                 dal.Drop();
 
                 //new Demo2DAL().Insert(new DemoInfo() { Name = Guid.NewGuid().ToString(), Date = DateTime.Now });

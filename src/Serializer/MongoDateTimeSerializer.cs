@@ -16,14 +16,28 @@ namespace TianCheng.DAL.MongoDB
     {
         public override DateTime Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args)
         {
-            var utcTime = base.Deserialize(context, args);
-            return new DateTime(utcTime.Ticks, DateTimeKind.Utc).ToLocalTime();
+            try
+            {
+                var utcTime = base.Deserialize(context, args);
+                return new DateTime(utcTime.Ticks, DateTimeKind.Utc).ToLocalTime();
+            }
+            catch
+            {
+                return new DateTime(DateTime.MinValue.Ticks, DateTimeKind.Utc).ToLocalTime();
+            }
         }
 
         public override void Serialize(BsonSerializationContext context, BsonSerializationArgs args, DateTime localTime)
         {
-            var utcTime = new DateTime(localTime.Ticks, DateTimeKind.Local).ToUniversalTime();
-            base.Serialize(context, args, utcTime);
+            try
+            {
+                var utcTime = new DateTime(localTime.Ticks, DateTimeKind.Local).ToUniversalTime();
+                base.Serialize(context, args, utcTime);
+            }
+            catch
+            {
+                base.Serialize(context, args, DateTime.MinValue);
+            }
         }
 
 

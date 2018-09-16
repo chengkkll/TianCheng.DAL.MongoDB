@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <AssemblyVersion>1.1.0.5</AssemblyVersion>
-    <FileVersion>1.1.0.5</FileVersion>
-    <Version>1.1.0.5-preview</Version>
+    <AssemblyVersion>1.1.0.7</AssemblyVersion>
+    <FileVersion>1.1.0.7</FileVersion>
+    <Version>1.1.0.7-preview</Version>
     <Authors>KKLL</Authors>
     <Company>TianCheng</Company>
     <Description>MongoDB 的数据库访问操作</Description>
@@ -23,27 +23,35 @@
     <Compile Remove="CompanyManage\**" />
     <Compile Remove="Demo\**" />
     <Compile Remove="Exhibition\**" />
+    <Compile Remove="OldVer\**" />
     <Compile Remove="SaleManage\**" />
     <Compile Remove="SystemBaseInfo\**" />
     <EmbeddedResource Remove="BaseDAL\**" />
     <EmbeddedResource Remove="CompanyManage\**" />
     <EmbeddedResource Remove="Demo\**" />
     <EmbeddedResource Remove="Exhibition\**" />
+    <EmbeddedResource Remove="OldVer\**" />
     <EmbeddedResource Remove="SaleManage\**" />
     <EmbeddedResource Remove="SystemBaseInfo\**" />
     <None Remove="BaseDAL\**" />
     <None Remove="CompanyManage\**" />
     <None Remove="Demo\**" />
     <None Remove="Exhibition\**" />
+    <None Remove="OldVer\**" />
     <None Remove="SaleManage\**" />
     <None Remove="SystemBaseInfo\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MongoDB.Bson" Version="2.4.4" />
-    <PackageReference Include="MongoDB.Driver" Version="2.4.4" />
+    <Compile Remove="NewVer\DBLog.cs" />
+    <Compile Remove="NewVer\DBMappingAttribute.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MongoDB.Bson" Version="2.7.0" />
+    <PackageReference Include="MongoDB.Driver" Version="2.7.0" />
     <PackageReference Include="Serilog.Sinks.MongoDB" Version="3.1.0" />
-    <PackageReference Include="TianCheng.Model" Version="1.1.0.5-preview" />
+    <PackageReference Include="TianCheng.DAL.Interface" Version="1.0.0" />
   </ItemGroup>
 
 </Project>

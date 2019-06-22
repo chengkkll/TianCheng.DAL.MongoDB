@@ -1,10 +1,6 @@
 ﻿using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace TianCheng.DAL.MongoDB
 {
@@ -14,6 +10,12 @@ namespace TianCheng.DAL.MongoDB
     /// </summary>
     public class MongoDateTimeSerializer : DateTimeSerializer
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="args"></param>
+        /// <returns></returns>
         public override DateTime Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args)
         {
             try
@@ -26,7 +28,12 @@ namespace TianCheng.DAL.MongoDB
                 return new DateTime(DateTime.MinValue.Ticks, DateTimeKind.Utc).ToLocalTime();
             }
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="args"></param>
+        /// <param name="localTime"></param>
         public override void Serialize(BsonSerializationContext context, BsonSerializationArgs args, DateTime localTime)
         {
             try
@@ -39,7 +46,5 @@ namespace TianCheng.DAL.MongoDB
                 base.Serialize(context, args, DateTime.MinValue);
             }
         }
-
-
     }
 }

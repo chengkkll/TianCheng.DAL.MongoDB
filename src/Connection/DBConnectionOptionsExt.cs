@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace TianCheng.DAL
+﻿namespace TianCheng.DAL.MongoDB
 {
     /// <summary>
     /// 数据库链接配置
@@ -16,13 +12,11 @@ namespace TianCheng.DAL
         /// <returns></returns>
         static public string ConnectionString(this DBConnectionOptions options)
         {
-
-            if (options.ServerAddress.EndsWith('/') || options.Database.StartsWith('/'))
+            if (options.ServerAddress.EndsWith("/") || options.Database.StartsWith("/"))
             {
                 return options.ServerAddress + options.Database;
             }
             return options.ServerAddress + "/" + options.Database;
         }
     }
-
 }

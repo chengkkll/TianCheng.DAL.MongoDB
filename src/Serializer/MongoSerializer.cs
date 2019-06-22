@@ -1,18 +1,14 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.Serializers;
-using MongoDB.Driver;
 //using MongoDB.Driver.Builders;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using TianCheng.Model;
 
 namespace TianCheng.DAL.MongoDB
 {
+    /// <summary>
+    /// 将一个对象序列化成MongoDB的查询条件
+    /// </summary>
     public class MongoSerializer
     {
         /// <summary>
@@ -65,17 +61,12 @@ namespace TianCheng.DAL.MongoDB
                 //DateTime特殊处理
                 if (property.PropertyType.ToString() == "System.DateTime")
                 {
-                    DateTime dateTimeValue;
-                    DateTime.TryParse(property.GetValue(entity, null).ToString(), out dateTimeValue);
-
-                    var value = property.GetValue(entity, null);
-
-                    //忽略DateTime空值
-                    if (dateTimeValue == DateTime.MinValue)
+                    if (!DateTime.TryParse(property.GetValue(entity, null).ToString(), out DateTime dateTimeValue) || dateTimeValue == DateTime.MinValue)
                     {
                         continue;
                     }
 
+                    var value = property.GetValue(entity, null);
                     var dateTimeValueStrong = (DateTime)value;
                     var utcTime = new DateTime(dateTimeValueStrong.Ticks, DateTimeKind.Utc);
                     query.Add(property.Name, BsonDateTime.Create(utcTime));
